@@ -21,20 +21,45 @@ if not (driver.title == "setlist.fm - the setlist wiki"):
 
 search = driver.find_element_by_id("id6")
 # TODO: GUI input
-search.send_keys("babymetal")
+ARTIST = "babymetal"
+search.send_keys(ARTIST)
 search.send_keys(Keys.RETURN)
 
 # search and wait for the page to load results
 try:
-    results = WebDriverWait(driver, 5).until(
+    contents = WebDriverWait(driver, 5).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, ".row.contentBox.visiblePrint"))
     )
-    print(results.text)
+    # print(contents.text)
 except:
     print("ERROR: Results were not loaded properly.")
     driver.quit()
 
+results = contents.find_elements(By.CSS_SELECTOR, ".col-xs-12.setlistPreview")
 
-time.sleep(5)
+# print(results)
+
+show = {}
+
+# parse thru each result and store info in a list
+for result in results:
+    condensedDateBlock = result.find_element(By.CSS_SELECTOR, ".condensed.dateBlock").text
+    month = result.find_element(By.CSS_SELECTOR, ".month").text
+    day = result.find_element(By.CSS_SELECTOR, ".day").text
+    year = result.find_element(By.CSS_SELECTOR, ".year").text
+    date = (month, day, year)
+    showName = result.find_element(By.TAG_NAME, "h2").find_element(By.TAG_NAME, "a").text
+    details = result.find_element(By.CSS_SELECTOR, ".details").text
+    setTimes = result.find_element(By.CSS_SELECTOR, ".setlistPreviewSetTimes").text
+    setSummary = result.find_element(By.CSS_SELECTOR, ".setSummary").text
+    for info in date:
+        print(info, end=" ")
+    print(showName)
+    print(details)
+    print(setTimes)
+    print(setSummary)
+    print("-------------")
+
+# time.sleep(5)
 
 driver.quit()
