@@ -5,6 +5,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import csv
+import re
+
 
 # testing purposes, might keep for demo purposes
 import time
@@ -39,7 +42,7 @@ results = contents.find_elements(By.CSS_SELECTOR, ".col-xs-12.setlistPreview")
 
 # print(results)
 
-show = {}
+shows = []
 
 # parse thru each result and store info in a list
 for result in results:
@@ -48,17 +51,39 @@ for result in results:
     day = result.find_element(By.CSS_SELECTOR, ".day").text
     year = result.find_element(By.CSS_SELECTOR, ".year").text
     date = (month, day, year)
+    dateStr = ', '.join(date)
     showName = result.find_element(By.TAG_NAME, "h2").find_element(By.TAG_NAME, "a").text
     details = result.find_element(By.CSS_SELECTOR, ".details").text
     setTimes = result.find_element(By.CSS_SELECTOR, ".setlistPreviewSetTimes").text
     setSummary = result.find_element(By.CSS_SELECTOR, ".setSummary").text
-    for info in date:
-        print(info, end=" ")
-    print(showName)
-    print(details)
-    print(setTimes)
-    print(setSummary)
-    print("-------------")
+
+    # check for valid characters
+    curList = [dateStr, showName, details, setTimes, setSummary]
+    # print(curList)
+    for item in curList:
+        for string in item:
+            maybeBadStr = re.sub('[ -~]', '', string)
+            if (maybeBadStr != ""):
+                # print("maybe bad string:", maybeBadStr)
+                # print("BEFORE:", '\'', string, '\'')
+                string = string.replace(maybeBadStr, "-")
+                # print("AFTER:", '\'', string, '\'')
+                # print()
+            print(string)
+        print(item)
+
+    # shows.append(curTuple)
+
+# for show in shows:
+#     print(show)
+
+# TODO: write the info to a csv file
+# with open('concerts.csv', 'w', newline='') as csvfile:
+#     writer = csv.writer(csvfile, delimiter=',')
+#     for show in shows:
+#         writer.writerow(show)
+    
+
 
 # time.sleep(5)
 
