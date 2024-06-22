@@ -18,7 +18,7 @@ driver = webdriver.Chrome(PATH)
 # open a website in a tab
 driver.get("https://www.setlist.fm/")
 
-if not (driver.title == "setlist.fm - the setlist wiki"):
+if driver.title != "setlist.fm - the setlist wiki":
     print("ERROR: Site was not loaded properly.")
     exit()
 
@@ -34,6 +34,7 @@ try:
         EC.presence_of_element_located((By.CSS_SELECTOR, ".row.contentBox.visiblePrint"))
     )
     # print(contents.text)
+# probably a way to handle exceptions or store error msgs better 
 except:
     print("ERROR: Results were not loaded properly.")
     driver.quit()
@@ -59,32 +60,36 @@ for result in results:
 
     # check for valid characters
     curList = [dateStr, showName, details, setTimes, setSummary]
-    # print(curList)
-    for item in curList:
-        for string in item:
+    # print("before replacing: ", curList)
+    for listIndex, item in enumerate(curList):
+        for itemIndex, string in enumerate(item):
             maybeBadStr = re.sub('[ -~]', '', string)
             if (maybeBadStr != ""):
                 # print("maybe bad string:", maybeBadStr)
                 # print("BEFORE:", '\'', string, '\'')
-                string = string.replace(maybeBadStr, "-")
-                # print("AFTER:", '\'', string, '\'')
+                newString = string.replace(maybeBadStr, "-")
+                curList[listIndex][itemIndex].replace(curList[listIndex][itemIndex], newString)
+                # continue
+                # print("AFTER:", '\'', newString, '\'')
                 # print()
-            print(string)
-        print(item)
+            # print(string)
+        # print(item)
 
-    # shows.append(curTuple)
+    shows.append(curList)
 
-# for show in shows:
-#     print(show)
 
-# TODO: write the info to a csv file
-# with open('concerts.csv', 'w', newline='') as csvfile:
-#     writer = csv.writer(csvfile, delimiter=',')
-#     for show in shows:
-#         writer.writerow(show)
+driver.quit()
+
+# write the info to a csv file
+headers = ['Show date', 'Show name', 'Show details', 'Set times', 'Set summary']
+
+with open('concerts.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    writer.writerow(headers)
+    for show in shows:
+        writer.writerow(show)
     
 
 
 # time.sleep(5)
 
-driver.quit()
